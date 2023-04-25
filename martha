@@ -1,0 +1,40 @@
+#!/bin/bash
+# tent is 63 x 27 x 19"
+# which is 5.25 x 2.25 x 1.58 = 18.7 cubic feet
+# my fan is at max 205 CFM (cubic feet per minute)
+# if i had a 50 CF tent and 100 CF fan i could run it for 30 secs at half cap (100 CMU) every 10 mins
+# i will run it 20 secs every 10 mins
+
+# you can also find ip through 
+cmd="$HOME/repos/tplink-smartplug/tplink_smartplug.py"
+martha_mac="9C:53:22:98:B0:09"
+martha_ip_file=$HOME/.local/var/martha-ip.txt
+martha_ip=$(cat $martha_ip_file)
+
+function refresh_martha_ip () {
+	mac-to-ip "$martha_mac" > "$martha_ip_file"
+}
+
+function run_martha_cmd () {
+	echo "martha $1"
+	eval "$cmd -t $martha_ip -c $1"
+}
+
+seconds_per_exchange=30
+
+if [ "$1" = "-r" ]; then
+	echo "refreshing martha ip address based on mac address"
+	echo "old ip $martha_ip"
+	refresh_martha_ip
+	echo "new ip $(cat $martha_ip_file)"
+	exit 0
+fi
+
+# DEFAULT BODY
+date
+run_martha_cmd "on"
+sleep "${seconds_per_exchange}s"
+run_martha_cmd "off"
+
+
+
